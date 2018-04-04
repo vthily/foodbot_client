@@ -1,0 +1,533 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <link rel="icon" type="image/jpg" href="https://i.ytimg.com/vi/RKUsqBCiNzU/maxresdefault.jpg">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>SG Local Food Ordering Bot</title>
+    <link rel="stylesheet" media="screen" href ="static/bootstrap.min.css">
+    <link rel="stylesheet" href ="static/bootstrap.min.css">
+    <link rel="stylesheet" href="static/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+      .container {
+          margin: auto;
+          padding: 10px;
+          min-width: 300px;
+          min-height: 500px;
+          max-height: 500px;
+      }
+      .container_small {
+          margin: auto;
+          padding: 10px;
+          min-width: 300px;
+          max-width: 500px;
+          min-height: 500px;
+          max-height: 500px;
+      }
+
+      .one {
+          width: 70%;
+          float: left;
+          min-height: 500px;
+          max-height: 500px;
+      }
+      .two {
+          margin-left: 15%;
+          padding-left: 15px;
+          min-height: 500px;
+          max-height: 500px;
+      }
+
+      div.chatarea {
+          border: 1px inset #ccc;
+          background-color: white;
+          font: small arial, monospace black;
+          min-width: 300px;
+          max-height: 500px;
+          overflow-y : auto;
+
+          display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+          display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+          display: -ms-flexbox;      /* TWEENER - IE 10 */
+          display: -webkit-flex;     /* NEW - Chrome */
+          display:  flex;
+          display: flexbox;
+          flex-direction: column-reverse;
+      }
+
+      #chat_history {
+        border: 1px solid black;
+        font: small arial, monospace black;
+        width:  400px;
+        height: 500px;
+        flex-direction: column;
+      }
+      #chat_history { overflow-y: auto; margin-bottom: 120px;}
+
+      div.debugarea {
+          border: 1px inset #ccc;
+          font: small arial, monospace blue;
+          min-height: 500px;
+          max-height: 500px;
+          padding-left: 15px;
+          overflow-y : auto;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .hideMe {
+          display: none !important;
+          visibility: hidden !important;
+      }
+      textarea
+      {
+        width:100%;
+      }
+
+      .btn-circle.btn-xl {
+          width: 70px;
+          height: 70px;
+          padding: 10px 16px;
+          border-radius: 35px;
+          font-size: 24px;
+          line-height: 1.33;
+      }
+
+      .btn-circle {
+          width: 30px;
+          height: 30px;
+          padding: 6px 0px;
+          border-radius: 15px;
+          text-align: center;
+          font-size: 12px;
+          line-height: 1.42857;
+      }
+
+    </style>
+
+    <meta name="viewport" content = "width=device-width, initial-scale=1.0">
+    <script>
+      function copyToClipboard(new_query) {
+          //alert(new_query)
+          document.getElementById("user_query").value = new_query;
+          document.getElementById("send").click();
+      };
+
+      function showDiv() {
+          document.getElementById('feedback_response').style.display = "block";
+      }
+
+      function showHideDiv() {
+          var x = document.getElementById("debuginformation");
+            if (x.style.display === "none") {
+              x.style.display = "block";
+              document.getElementById('chat_history').style.width='100%';
+            } else {
+              x.style.display = "none";
+              document.getElementById('chat_history').style.width='143%';
+            }
+      }
+      function checkLength() {
+          var currentquery = document.getElementById('user_query').value;
+          if (currentquery.length >= 255) {
+              document.getElementById('showwarningalert').style.display = "block";
+          }
+          else {
+              document.getElementById('showwarningalert').style.display = "none";
+          }
+      }
+
+      function popitup(url) {
+          newwindow=window.open(url,'name','height=200,width=150');
+          if (window.focus) {newwindow.focus()}
+          return false;
+      }
+
+      function getFeedback(id, userFeedback) {
+          if (userFeedback == "like") {
+              document.getElementById('dislikeresponse' + id).style.display = "none";
+              document.getElementById('likeresponse' + id).style.display = "block";
+              document.getElementById('likeresponse' + id).onclick = function() { return false; };
+              document.getElementById('response_id').value = "like"
+          } else {
+              document.getElementById('dislikeresponse' + id).style.display = "block";
+              document.getElementById('dislikeresponse' + id).onclick = function() { return false; };
+              document.getElementById('response_id').value = "dislike"
+              document.getElementById('likeresponse' + id).style.display = "none";
+          }
+          document.getElementById('send').style.display = "block";
+      }
+
+      function resetContext(){
+              document.getElementById('reset_context').value = "true";
+              this.parentNode.submit();
+      }
+
+      // now not using
+      function httpGetAsync(theUrl, callback)
+      {
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.onreadystatechange = function() {
+              if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                  callback(xmlHttp.responseText);
+          }
+          xmlHttp.open("GET", theUrl, true); // true for asynchronous
+          xmlHttp.send(null);
+      }
+  </script>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>
+      /* Reference links
+            http://webaudiodemos.appspot.com/
+            https://github.com/mattdiamond/Recorderjs
+            This recording should work on Chrome, Firefox but not IE or Safari yet!
+       */
+      function __log(e, data) {
+        log.innerHTML += "\n" + e + " " + (data || '');
+      }
+
+      var audio_context;
+      var recorder;
+
+      function startUserMedia(stream) {
+        var input = audio_context.createMediaStreamSource(stream);
+        __log('Media stream created.');
+
+        // Uncomment if you want the audio to feedback directly
+        //input.connect(audio_context.destination);
+        //__log('Input connected to audio context destination.');
+
+        recorder = new Recorder(input);
+        __log('Recorder initialised.');
+      }
+
+      function sgengRecording() {
+        cur_state = document.getElementById("recording_status").value;
+        if (cur_state == 'stop') {
+            __log('Recording...');
+            document.getElementById("recording_status").value = 'start';
+            document.getElementById("start_sgeng_img").src="../static/images/mic_recording.png";
+
+            recorder && recorder.record();
+
+        } else {
+            __log('Stopped recording.');
+            document.getElementById("recording_status").value = 'stop';
+            document.getElementById("start_sgeng_img").src="../static/images/mic_active.png";
+
+            recorder && recorder.stop();
+            // create WAV download link using audio data blob
+            createDownloadLink();
+            recorder.clear();
+        }
+      }
+
+      function startRecording(button) {
+        recorder && recorder.record();
+        button.disabled = true;
+        button.nextElementSibling.disabled = false;
+        __log('Recording...');
+      }
+
+      function stopRecording(button) {
+        recorder && recorder.stop();
+        button.disabled = true;
+        button.previousElementSibling.disabled = false;
+        __log('Stopped recording.');
+
+        // create WAV download link using audio data blob
+        createDownloadLink();
+
+        recorder.clear();
+      }
+
+      function createDownloadLink() {
+        recorder && recorder.exportWAV(function(blob) {
+          var url = URL.createObjectURL(blob);
+          var li = document.createElement('li');
+          var au = document.createElement('audio');
+          var hf = document.createElement('a');
+
+          au.controls = true;
+          au.src = url;
+          hf.href = url;
+          hf.download = new Date().toISOString() + '.wav';
+          hf.innerHTML = hf.download;
+          //alert(hf.download);
+          li.appendChild(au);
+          li.appendChild(hf);
+          recordingslist.appendChild(li);
+
+          uploadAudio(blob, url);
+        });
+      }
+
+      function uploadAudio(blob, filename){
+        var fd_upload = new FormData();
+        var d = new Date();
+        var n = d.toString();
+        fd_upload.append('fname', 'Rec-' + n +'.wav');
+        fd_upload.append('audio', blob);
+	      console.log(blob);
+        for (var pair of fd_upload.entries()) {
+            console.log(pair[0]+ ", " + pair[1]);
+        }
+
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: 'your url address',
+            data: fd_upload,
+            processData: false,
+            contentType: false,
+            cache: false,
+        }).done(function(lvcsr_out) {
+            console.log(lvcsr_out);
+            document.getElementById("user_query").value = lvcsr_out.hypotheses[0].utterance;
+            //if ( lvcsr_data.status == '1'){
+            //    console.log('transcript:', lvcsr_data.data[0].text);
+            //    document.getElementById("user_query").value = lvcsr_data.data[0].text;
+            //}
+        }).fail(function (jqXHR, status, error){
+	          console.log("jqXHR error");
+            console.log(jqXHR.fail());
+        });
+
+        console.log("Send successfully " + filename);
+
+      }
+
+
+      // Opera 8.0+
+      var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+
+      // Firefox 1.0+
+      var isFirefox = typeof InstallTrigger !== 'undefined';
+
+      // Safari 3.0+ "[object HTMLElementConstructor]"
+      var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+      // Internet Explorer 6-11
+      var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+      // Edge 20+
+      var isEdge = !isIE && !!window.StyleMedia;
+
+      // Chrome 1+
+      var isChrome = !!window.chrome && !!window.chrome.webstore;
+
+      // Blink engine detection
+      var isBlink = (isChrome || isOpera) && !!window.CSS;
+
+      if (isChrome) {
+        //alert("This is Chrome browser");
+      }
+
+      if (isFirefox) {
+        //alert("This is FireFox browser");
+      }
+
+
+      window.onload = function init() {
+        var objDiv = document.getElementById("chat_history");
+        objDiv.scrollTop = objDiv.scrollHeight;
+
+        try {
+          // webkit shim
+          window.AudioContext = window.AudioContext || window.webkitAudioContext;
+          //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+          navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+          window.URL = window.URL || window.webkitURL;
+
+          audio_context = new AudioContext;
+          __log('Audio context set up.');
+          __log('navigator.getUserMedia ' + (navigator.getUserMedia ? 'available.' : 'not present!'));
+        } catch (e) {
+          alert('No web audio support in this browser!');
+        }
+
+        navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
+          __log('No live audio input: ' + e);
+        });
+
+      };
+    </script>
+    <script type="text/javascript" src="/static/js/resampler.js"></script>
+    <script type="text/javascript" src="/static/js/platform.js"></script>
+    <script type="text/javascript" src="/static/js/webspeech.js"></script>
+    <script>
+        if (!('webkitSpeechRecognition' in window)) {
+            //start_button.style.visibility = 'hidden';
+            console.log('webkitSpeechRecognition not available');
+        }
+        var listener = new AudioListener();
+        var rbspeaker = new RobotSpeaker();
+
+        function listen() {
+            console.log('webspeech a-event');
+            listener.listen("en", function(text) {
+                console.log(text);
+                document.getElementById("user_query").value = text;
+                rbspeaker.speak("en",text);
+                });
+            }
+
+        function gspeak(){
+            var rbspeaker = new RobotSpeaker();
+            var usrinput = document.getElementById("user_query").value;
+            console.log(usrinput);
+            var pythonout = "{{ query }}";
+            console.log(pythonout);
+            rbspeaker.speak("en", "Are you looking for "+pythonout);
+          }
+    </script>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="/static/js/recorder.js"></script>
+    <!--<script src="/static/js/jquery-1.11.0.min.js"></script>-->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+  </head>
+  <body>
+    <h2 rel="stylesheet" align="center"><b><font face="Arial" color="darkblue">SG Local Food Ordering Bot</font></b> <p><p>
+      <img src="http://www.pvhc.net/img27/etkmxqpiedvgkwyioupj.png" rel="stylesheet" align="middle" width="60px" height="60px">
+      <img src="http://prod.static9.net.au/_/media/2017/05/26/15/55/Pohs-Hainanese-chicken-rice.jpg" rel="stylesheet" align="middle" height="60px">
+      <img src="http://www.salary.sg/wp-content/uploads/2017/02/singapore-uk-expats.jpg" rel="stylesheet" align="middle" height="60px">
+    </h2>
+
+    <div class="container">
+    <form  action="" method="post" role="form" id="chat_form" name="chat_form">
+    {{ form.csrf }}
+      <!-- ************************************** -->
+      <!-- SHOW THE MAIN FORM                     -->
+      <!-- ************************************** -->
+      <div class="form-group">
+        <!---------------CHAT HISTORY SECTION START ----------------------->
+        <section class="container_small">
+          <label for="name">Chat history</label>
+          <!--<div class='chatarea' id="chat_history" name="chat_history" >-->
+          <div id="chat_history" name="chat_history" >
+            {% for chat in form.chats[form.ssid] %}
+
+              {% if chat.user %}
+                <div align="right">
+                  {{chat['user'][1]}}
+                </div>
+                <!--<div class="alert alert-info"  align="right"><small>{{chat["user"][0]}}</small><p></p> {{chat["user"][1]}}</div>-->
+              {% endif %}
+
+              <div class="alert alert-warning"> <small>Bot ({{chat["time"]}}): </small><p></p>
+                {% for item in chat["retro"] %}
+
+                  {{item["text"]}}
+                  {% if "http" in item["link"]: %}
+                   <a class="nav-link active" href={{item["link"]}} width="100px" target="_blank">[Click here]</a>
+                  {% endif %}
+
+                {% endfor %}
+
+                {% for section in chat["bot"] %}
+                  {% for item in section %}
+
+                      {% if "http" in item["link"]: %}
+                       <li> {{item["text"]}}  <a class="nav-link active" href={{item["link"]}} width="100px" target="_blank">[Click here]</a></li>
+                      {% else: %}
+                       <li>{{item["text"]}}</li>
+                      {% endif %}
+
+                  {% endfor %}
+                {% endfor %}
+
+                {% for url in chat["link"] %}
+                  <a class="nav-link active" href={{url}} width="100px" target="_blank">Click here</a>
+                {% endfor %}
+
+
+                {% if chat.meta %}
+                  {% for more_text in chat["meta"]["text"][1:] %}
+                    <br></br>
+                    {{ more_text }}
+                  {% endfor %}
+                {% endif %}
+
+                <!-- =========== DISPLAY THE CARDS: image for example ===========-->
+                {% if chat.meta %}
+                  {% set no_of_cards= ((chat["meta"]["cards"])|length) // 2 %}
+                  {% set no_of_replies = ((chat["meta"]["quickreplies"])|length) %}
+
+                  {% if no_of_cards > 0 %}
+                    <p></p>
+                    {% for i in range(0, no_of_cards) %}
+                      <img src="{{ chat['meta']['cards'][i * 2 + 1] }}" alt="{{ chat['meta']['cards'][i * 2 + 0] }}" height="42" width="*">
+                    {% endfor %}
+                  {% endif %}
+
+                  {% if no_of_replies > 0 %}
+                    <p></p>
+                    {{ chat["meta"]["quickreplies"][0] }}
+                    <p></p>
+                    {% for reply in chat["meta"]["quickreplies"][1:] %}
+                      <button type="button" class="btn btn-info btn-circle btn-lg" onclick="copyToClipboard('{{reply}}')"><i class="fa fa-check">?</i></button> {{reply}}
+                    {% endfor %}
+                  {% endif %}
+
+                {% endif %}
+                <!-- =========== DISPLAY THE CARDS: image for example ===========-->
+
+              </div>
+
+            {% endfor %}
+          </div><!--<div class='chatarea'>-->
+        </section>
+        <p></p>
+        <p></p>
+        <br></br>
+        <br></br>
+        <!---------------CHAT HISTORY SECTION END ----------------------->
+
+        <label for="text" >User query (enter text below or using Google voice, SgEng voice)</label>
+        <a href="#" id="start_button" onclick="listen()"><img alt="Start" id="start_img" height="30" width="*" src="/static/images/google_mic.png"> Google Voice</a>
+
+        <a href="#" id="start_sgeng_button" onclick="sgengRecording()"><img alt="Start" id="start_sgeng_img" height="30" width="*" src="/static/images/mic_active.png"> SgEng Voice</a>
+        <input type="hidden" class="form-control" id="recording_status" name="recording_status" value="stop" display="none">
+
+        <p></p>
+        <input type="text" class="form-control" id="user_query" name="user_query" maxlength="255" onchange="checkLength()" placeholder="Enter a query." autofocus>
+        <p></p>
+
+        <!-- ************************************** -->
+        <!--      VERIFICATION & CACHE SECTION      -->
+        <!-- ************************************** -->
+        <p><div class="alert alert-danger" role="alert" id="showwarningalert" style="display:none">
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          <span class="sr-only">Error:</span> Your query entered exceeds the maximum length (256 characters)
+        </div>
+        <p>
+        <input type="hidden" class="form-control" id="session_id" name="session_id" value="{{form.ssid}}" display="none">
+        <input type="hidden" class="form-control" id="response_id" name="response_id" value="" display="none">
+        <input type="hidden" class="form-control" id="reset_id" name="reset_id" value="{{form.reset_context}}" display="none">
+      </div><!--<div class="form-group">-->
+
+        <!-- ************************************** -->
+        <!--          SEND BUTTON - SUBMIT FORM     -->
+        <!-- ************************************** -->
+        <button type="submit" class="btn btn-success" id="send" name="send" display="None">Send</button>
+        <a href="#" type="submit" id="reset_button" onclick="this.parentNode.submit(); return false;"> Reset context</a>
+
+        <!---------------RECORDING SECTION START ----------------------->
+        <h4>Recordings</h4>
+        <ul id="recordingslist"></ul>
+
+        <h4>Log</h4>
+        <pre id="log"></pre>
+        <!---------------RECORDING SECTION STOP ----------------------->
+    </form>
+
+    </div>
+</body>
+</html>

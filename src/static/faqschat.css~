@@ -1,0 +1,27 @@
+div.tarea {
+    border: 1px inset #ccc;
+    background-color: white;
+    font: small courier, monospace black;
+    width: 500px;
+    height: 300px; /* or whatever measurements you want */
+    overflow: auto; /* in most browsers, this will results in a scrollbar when there's more content than can fit in the dimensions defined above */
+}
+
+/* the div for LEARN MORE */
+#trt {
+    z-index: 9999999999999;
+    position: relative;
+    float: right;
+    bottom: 0; // not working
+    top: 12; //not working
+}
+
+/* the entire div */
+.main .cols { padding-left: 2px; padding-right: 0px; padding-top: 10px; }
+.main .cols .col { width: 315px; height: 108px; float: left;  background: url(images/tempf.png) no-repeat 0 0; }
+.main .cols .col:after { content:''; width: 100%; clear: both; }
+.main .cols .col + .col { padding-left: 20px; }
+.main .cols .col img.hid { float: left; width: 129px; height: 108px;  }
+.main .cols .col-cnt { width: 183px; float: right; }
+.main .cols .col .more { font-weight: bold; color: #0206AA; }
+
