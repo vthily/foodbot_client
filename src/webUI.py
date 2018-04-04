@@ -11,7 +11,7 @@ from functools import wraps
 from flask import request, Response
 
 from apiai_connector import ask_question_v2, ask_question
-from resources.tabledef_users import create_engine, User
+#from resources.tabledef_users import create_engine, User
 from mlogging.mlogger import logger
 
 from webUI_utilities import ChatForm
@@ -23,7 +23,7 @@ from flask import Flask, request, redirect, url_for
 from werkzeug.utils import secure_filename
 # End of support the audio/wav files
 
-engine = create_engine('sqlite:///resources/users.db', echo=True)
+#engine = create_engine('sqlite:///resources/users.db', echo=True)
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 intents_db = os.path.join(CUR_DIR, 'resources/all_intents.json')
 
