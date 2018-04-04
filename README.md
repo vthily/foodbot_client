@@ -15,29 +15,34 @@ More about the dialogflow framework here: https://dialogflow.com/
 # Dependencies
 List of packages required to install before running the client:
 
-  pytz   
-  python-dateutil   
-  sqlalchemy   
-  flask   
-  apiai   
-  pyenchant   
-  wtforms   
-  ntlk 
+    pytz   
+    python-dateutil   
+    sqlalchemy   
+    flask   
+    apiai   
+    pyenchant   
+    wtforms   
+    ntlk 
   
 
 # Notes before running
 1. Update the path to logs folder (in src/mlogging/logging.json): should replace the actual path in your server, for example:
-sys_log_dir/verbose.log => /local/foodchatbot/webUI/logs/errors.log
+
+    sys_log_dir/verbose.log => /local/foodchatbot/webUI/logs/errors.log
 
 2. Update your client access token to your bot agent (src/apiai_connector.py)
-CLIENT_ACCESS_TOKEN = 'YOUR_AGENT_ACCESS_TOKEN' 
+    CLIENT_ACCESS_TOKEN = 'YOUR_AGENT_ACCESS_TOKEN' 
 
 
 # Running the web interface
 Go to src folder and running the command
 
     $ python webUI.py
+  
     
+Checkout the browser http://localhost:4010/chat and start chatting with your agent, or http://<your_ip_addr>:4010/chat
+(The voice is not supported if you use the ip address). And the port number is reflected in your code in webUI.py
 
+    app.run(host='0.0.0.0', port=4010)
 
 
