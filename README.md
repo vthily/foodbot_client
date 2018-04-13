@@ -28,8 +28,8 @@ List of packages required to install before running the client:
 # Notes before running
 1. Update the path to logs folder (in src/mlogging/logging.json, renaming logging_template.json to logging.json): should replace the actual path in your server (assume you clone the code to /local/foodchatbot/webUI), for example:
 
-    sys_log_dir/verbose.log => /local/foodchatbot/webUI/logs/verbose.log
-    sys_log_dir/info.log => /local/foodchatbot/webUI/logs/info.log
+    sys_log_dir/verbose.log => /local/foodchatbot/webUI/logs/verbose.log    
+    sys_log_dir/info.log => /local/foodchatbot/webUI/logs/info.log    
     sys_log_dir/errors.log => /local/foodchatbot/webUI/logs/errors.log
 
 2. Update your client access token to your bot agent (src/apiai_connector.py)
